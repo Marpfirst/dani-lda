@@ -19,7 +19,7 @@ sys.path.append(str(Path(__file__).resolve().parent / "src"))
 from preprocessing import build_stopwords, preprocess_document, apply_ngrams
 
 # ====== KONFIG ======
-MODEL_DIR = Path("models_tune")
+MODEL_DIR = Path("models")
 LABELS_PATH = MODEL_DIR / "topic_labels.json"
 EXTRA_STOP_PATH = Path("data/custom_stopwords.txt")
 
