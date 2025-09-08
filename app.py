@@ -26,7 +26,7 @@ EXTRA_STOP_PATH = Path("data/custom_stopwords.txt")
 # ====== LOAD ARTEFAK ======
 @st.cache_resource
 def load_artifacts():
-    lda = LdaModel.load(str(MODEL_DIR / "lda_best.model"))
+    lda = LdaModel.load(str(MODEL_DIR / "lda_K10.model"))
     dictionary = Dictionary.load(str(MODEL_DIR / "dictionary.dict"))
     with open(MODEL_DIR / "bigram.phraser", "rb") as f:
         bigram = pickle.load(f)
