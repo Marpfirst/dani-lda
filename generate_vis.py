@@ -6,7 +6,7 @@ from gensim.models import LdaModel
 from gensim.corpora import Dictionary
 
 # --- SESUAIKAN BAGIAN INI ---
-MODEL_PATH = "models_tune/lda_best.model"
+MODEL_PATH = "models_tune/lda_K10.model"
 DICT_PATH = "models_tune/dictionary.dict"
 # Anda HARUS menyediakan path ke file corpus training Anda.
 # Ini adalah data yang Anda gunakan untuk melatih model LDA.
