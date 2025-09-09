@@ -227,7 +227,7 @@ with st.sidebar:
     with st.expander("Lihat Metrik Performa Model"):
         st.markdown(
             """
-            - **Coherence (c_v):** `0.453`
+            - **Coherence (c_v):** `0.4341`
             - **Log Perplexity:** `-7.83`
             - **Topic Diversity:** `Tinggi`
             """
@@ -478,7 +478,7 @@ if user_text:
             with open(html_file_path, 'r', encoding='utf-8') as f:
                 html_string = f.read()
                 # Tampilkan HTML di dalam komponen Streamlit tanpa width tetap
-                components.html(html_string, height=1200, scrolling=False)
+                components.html(html_string, height=1000, scrolling=False)
         else:
             st.warning(
                 "File visualisasi pyLDAvis tidak ditemukan. "
