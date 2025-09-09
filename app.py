@@ -333,9 +333,9 @@ with col2:
     - Pilih artikel dari portal berita terpercaya
     
     **Catatan tentang sistem:**
-    - Model *Latent Dirichlet Allocation (LDA)* bekerja tanpa label manual
-    - Sistem akan menampilkan **Topik 1, Topik 2, ... Topik N** dengan kata kunci penting
-    - Topik dapat mewakili tema umum (misalnya: politik, ekonomi, olahraga, kriminal, dll.)
+    - Model *Latent Dirichlet Allocation (LDA)* bekerja secara unsupervised (tanpa label manual)
+    - Hasil analisis berupa **Topik 1, Topik 2, ... Topik N**, masing-masing ditandai oleh kata kunci penting
+    - Interpretasi makna setiap topik dilakukan berdasarkan kumpulan kata kunci yang muncul
     """)
 
 
