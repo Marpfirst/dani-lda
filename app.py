@@ -462,28 +462,61 @@ if user_text:
             st.warning("Tidak dapat membuat wordcloud - artikel terlalu pendek.")
             
     with tab4:
-        st.markdown("### Visualisasi Inter-Topik (pyLDAvis)")
-        st.info(
-            """
-            Visualisasi ini memungkinkan Anda untuk menjelajahi hubungan antar topik.
-            - **Lingkaran di Kiri:** Setiap lingkaran adalah satu topik. Ukuran menunjukkan seberapa umum topik tersebut. Jarak antar lingkaran menunjukkan seberapa mirip mereka.
-            - **Bagan di Kanan:** Menunjukkan kata-kata yang paling relevan untuk topik yang dipilih.
-            """
-        )
-        
-        # Path ke file HTML yang sudah dibuat
-        html_file_path = Path("pyldavis_visualization.html")
-
-        if html_file_path.exists():
-            with open(html_file_path, 'r', encoding='utf-8') as f:
-                html_string = f.read()
-                # Tampilkan HTML di dalam komponen Streamlit tanpa width tetap
-                components.html(html_string, height=1000, scrolling=True)
-        else:
-            st.warning(
-                "File visualisasi pyLDAvis tidak ditemukan. "
-                "Harap jalankan skrip `generate_vis.py` terlebih dahulu."
+            st.markdown("### 🔍 Visualisasi Inter-Topik (pyLDAvis)")
+            
+            # Peringatan untuk user experience yang lebih baik
+            st.info(
+                """
+                **Panduan Visualisasi:**
+                - **Panel Kiri:** Peta jarak antar topik (klik lingkaran untuk memilih topik)
+                - **Panel Kanan:** 30 kata paling relevan untuk topik yang dipilih
+                - **Slider λ (Lambda):** Mengatur keseimbangan frekuensi vs eksklusivitas kata
+                """
             )
+            
+            html_file_path = Path("pyldavis_visualization.html")
+
+            if html_file_path.exists():
+                with open(html_file_path, 'r', encoding='utf-8') as f:
+                    html_content = f.read()
+                
+                # Solusi sederhana - biarkan pyLDAvis mengatur layoutnya sendiri
+                simple_wrapper = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        body {{
+                            margin: 0;
+                            padding: 0;
+                            overflow: auto;
+                            background: white;
+                        }}
+                        
+                        /* Biarkan pyLDAvis menggunakan ukuran default, hanya pastikan tidak terpotong */
+                        #ldavis_el {{
+                            margin: 0 !important;
+                            padding: 0 !important;
+                        }}
+                    </style>
+                </head>
+                <body>
+                    {html_content.split('<body>')[1].split('</body>')[0] if '<body>' in html_content else html_content}
+                </body>
+                </html>
+                """
+                
+                # Tampilkan dengan ukuran yang cukup besar untuk menampung layout asli pyLDAvis
+                components.html(simple_wrapper, height=750, scrolling=True)
+                
+            else:
+                st.error(
+                    "❌ **File visualisasi tidak ditemukan!**\n\n"
+                    "File `pyldavis_visualization.html` belum ada. Pastikan Anda sudah:\n"
+                    "1. Menjalankan script untuk generate model LDA\n"
+                    "2. Membuat visualisasi pyLDAvis dengan `pyldavis.save_html()`"
+                )
 
 # Footer
 st.markdown("---")
