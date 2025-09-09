@@ -263,9 +263,9 @@ with col1:
         # PENTING: Ganti URL di bawah ini dengan URL artikel berita asli
         # yang Anda tahu akan memberikan hasil baik untuk topik tersebut.
         DEMO_URLS = {
-            "Politik": "https://news.detik.com/pemilu/d-7734827/respons-anies-prabowo-dan-ganjar-soal-mundurnya-mahfud-md-dari-kabinet",
-            "Olahraga": "https://sport.detik.com/sepakbola/d-7737217/liverpool-hajar-chelsea-4-1",
-            "Ekonomi": "https://finance.detik.com/moneter/d-7736486/sri-mulyani-tarik-utang-rp-57-5-t-di-januari-2024"
+            "Politik": "https://nasional.kompas.com/read/2025/08/22/12433401/kaesang-sebut-psi-harus-bawa-manfaat-besar-bukan-menjarah-rakyat",
+            "Olahraga": "https://bola.kompas.com/read/2025/09/09/10281588/evaluasi-patrick-kluivert-usai-timnas-indonesia-imbang-lawan-lebanon",
+            "Ekonomi": "https://finance.detik.com/berita-ekonomi-bisnis/d-8052246/ekonomi-tumbuh-5-12-tapi-penerimaan-pajak-malah-anjlok-kok-bisa"
         }
 
         # Inisialisasi session state jika belum ada
