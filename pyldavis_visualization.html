@@ -39,24 +39,3 @@ if(typeof(LDAvis) !== "undefined"){
          });
 }
 </script>
-
-<script>
-(function () {
-  function resize() {
-    var h = Math.max(
-      document.documentElement.scrollHeight || 0,
-      document.body.scrollHeight || 0,
-      document.documentElement.clientHeight || 0
-    );
-    window.parent.postMessage(
-      { type: "streamlit:setFrameHeight", height: h + 20 },
-      "*"
-    );
-  }
-  window.addEventListener("load", resize);
-  if ('ResizeObserver' in window) {
-    new ResizeObserver(resize).observe(document.body);
-  }
-  setInterval(resize, 1000);
-})();
-</script>
