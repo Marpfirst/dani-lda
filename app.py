@@ -13,14 +13,12 @@ from collections import Counter
 import pandas as pd
 import streamlit.components.v1 as components
 
-
 # modul preprocessing di root yang sama
 sys.path.append(str(Path(__file__).resolve().parent / "src"))
 from preprocessing import build_stopwords, preprocess_document, apply_ngrams
 
 # ====== KONFIG ======
 MODEL_DIR = Path("models")
-LABELS_PATH = MODEL_DIR / "topic_labels.json"
 EXTRA_STOP_PATH = Path("data/custom_stopwords.txt")
 
 # ====== LOAD ARTEFAK ======
@@ -38,25 +36,8 @@ def load_artifacts():
         extra = [w.strip().lower() for w in EXTRA_STOP_PATH.read_text(encoding="utf-8").splitlines() if w.strip()]
         stopw |= set(extra)
 
-    # Load topic labels dan deskripsi
-    labels = {str(t): f"Topik {t}" for t in range(lda.num_topics)}
-    descriptions = {str(t): "Kategori berita yang diidentifikasi oleh sistem." for t in range(lda.num_topics)}
-    
-    if LABELS_PATH.exists():
-        try:
-            data = json.loads(LABELS_PATH.read_text(encoding="utf-8"))
-            if isinstance(data, dict):
-                # Jika ada struktur: {"0": {"label": "...", "desc": "..."}}
-                for k, v in data.items():
-                    if isinstance(v, dict):
-                        labels[k] = v.get("label", f"Topik {k}")
-                        descriptions[k] = v.get("desc", "Kategori berita yang diidentifikasi oleh sistem.")
-                    else:
-                        labels[k] = str(v)
-        except Exception:
-            pass
-
-    return lda, dictionary, bigram, trigram, stopw, labels, descriptions
+    # (Dihilangkan) Pemakaian labels/descriptions manual
+    return lda, dictionary, bigram, trigram, stopw
 
 def extract_text_from_url(url: str) -> str:
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
@@ -111,11 +92,12 @@ def create_confidence_gauge(top_score):
     fig.update_layout(height=300)
     return fig
 
-def create_topic_distribution_chart(topic_dist, labels, top_n=8):
+def create_topic_distribution_chart(topic_dist, lda, top_n=8):
     """Interactive bar chart untuk distribusi topik"""
     top_topics = topic_dist[:top_n]
     
-    topic_labels = [labels.get(str(tid), f"Topik {tid}") for tid, _ in top_topics]
+    # TAMPILKAN 1-BASED
+    topic_labels = [f"Topik {tid+1}" for tid, _ in top_topics]
     scores = [score for _, score in top_topics]
     
     # Warna berbeda untuk top 3
@@ -125,8 +107,8 @@ def create_topic_distribution_chart(topic_dist, labels, top_n=8):
         x=scores, 
         y=topic_labels,
         orientation='h',
-        title="Distribusi Kategori Berita",
-        labels={'x': 'Probabilitas', 'y': 'Kategori'},
+        title="Distribusi Topik Artikel",
+        labels={'x': 'Probabilitas', 'y': 'Topik'},
         color=topic_labels,
         color_discrete_sequence=colors
     )
@@ -174,6 +156,12 @@ def create_document_wordcloud(tokens, max_words=30):
 def is_too_short(tokens, min_tokens=30):
     return tokens is None or len(tokens) < min_tokens
 
+def top_terms_list(lda, topic_id: int, topn: int = 10):
+    return [w for (w, _) in lda.show_topic(topic_id, topn=topn)]
+
+def top_terms_str(lda, topic_id: int, topn: int = 10):
+    return ", ".join(top_terms_list(lda, topic_id, topn=topn))
+
 # ====== UI ======
 st.set_page_config(
     page_title="Sistem Analisis Topik Berita", 
@@ -186,14 +174,14 @@ st.markdown("""
 <div style="text-align: center; padding: 2rem 0;">
     <h1>🔍 Sistem Analisis Topik Berita Indonesia</h1>
     <p style="font-size: 1.2rem; color: #666;">
-        Menggunakan Machine Learning (LDA) untuk mengidentifikasi kategori berita secara otomatis
+        Menggunakan Topic Modeling (LDA) untuk mengekstraksi <em>topik laten</em> dari artikel berita
     </p>
 </div>
 """, unsafe_allow_html=True)
 
 # Load model
 try:
-    lda, dictionary, bigram, trigram, stopw, labels, descriptions = load_artifacts()
+    lda, dictionary, bigram, trigram, stopw = load_artifacts()
     model_loaded = True
 except Exception as e:
     st.error(f"❌ Gagal memuat model: {e}")
@@ -227,7 +215,7 @@ with st.sidebar:
     with st.expander("Lihat Metrik Performa Model"):
         st.markdown(
             """
-            - **Coherence (c_v):** `0.4341`
+            - **Coherence (c_v):** `0.453`
             - **Log Perplexity:** `-7.83`
             - **Topic Diversity:** `Tinggi`
             """
@@ -245,7 +233,7 @@ with st.sidebar:
     1. **Input**: Masukkan URL artikel berita.
     2. **Ekstraksi**: Sistem mengambil teks dari URL.
     3. **Analisis**: Model LDA memprediksi distribusi topik.
-    4. **Output**: Menampilkan kategori dominan & visualisasi.
+    4. **Output**: Menampilkan topik dominan & visualisasi.
     """)
 
     # 5. FOOTER (Opsional, tapi menambah kesan profesional)
@@ -273,11 +261,11 @@ with col1:
 
         # 1. Siapkan beberapa contoh URL Demo
         # PENTING: Ganti URL di bawah ini dengan URL artikel berita asli
-        # yang Anda tahu akan memberikan hasil baik untuk kategori tersebut.
+        # yang Anda tahu akan memberikan hasil baik untuk topik tersebut.
         DEMO_URLS = {
-            "Politik": "https://nasional.kompas.com/read/2025/08/22/12433401/kaesang-sebut-psi-harus-bawa-manfaat-besar-bukan-menjarah-rakyat",
-            "Olahraga": "https://bola.kompas.com/read/2025/06/01/19000048/timnas-indonesia-tanpa-eliano-dan-sandy-walsh-kluivert-siapkan-sayuri-bersaudara",
-            "Ekonomi": "https://www.metrotvnews.com/read/b3JCplRo-populer-ekonomi-bansos-cair-agustus-2025-hingga-sri-mulyani-bidik-pajak-dari-pedagang-eceran"
+            "Politik": "https://news.detik.com/pemilu/d-7734827/respons-anies-prabowo-dan-ganjar-soal-mundurnya-mahfud-md-dari-kabinet",
+            "Olahraga": "https://sport.detik.com/sepakbola/d-7737217/liverpool-hajar-chelsea-4-1",
+            "Ekonomi": "https://finance.detik.com/moneter/d-7736486/sri-mulyani-tarik-utang-rp-57-5-t-di-januari-2024"
         }
 
         # Inisialisasi session state jika belum ada
@@ -340,22 +328,22 @@ with col2:
     st.markdown("## 💡 Tips")
     st.info("""
     **Untuk hasil terbaik:**
-    - Artikel minimal 3-5 paragraf
-    - Bahasa Indonesia
-    - Dari portal berita terpercaya
+    - Gunakan artikel minimal 3–5 paragraf
+    - Pastikan teks dalam Bahasa Indonesia
+    - Pilih artikel dari portal berita terpercaya
     
-    **Sistem dapat mengidentifikasi:**
-    - Politik & Pemerintahan
-    - Ekonomi & Bisnis  
-    - Olahraga
-    - Kriminal & Hukum
-    - Dan 16 kategori lainnya
+    **Catatan tentang sistem:**
+    - Model *Latent Dirichlet Allocation (LDA)* bekerja tanpa label manual
+    - Sistem akan menampilkan **Topik 1, Topik 2, ... Topik N** dengan kata kunci penting
+    - Topik dapat mewakili tema umum (misalnya: politik, ekonomi, olahraga, kriminal, dll.)
     """)
+
 
 # Analysis Results
 if user_text:
     st.markdown("---")
     st.markdown(f"## 📊 Hasil Analisis: {article_title}")
+    st.caption("Catatan: Penomoran topik di aplikasi ini menggunakan format **Topik 1..N** (bukan 0..N-1) agar selaras dengan tampilan pyLDAvis.")
     
     with st.spinner("🤖 Menganalisis topik artikel..."):
         toks_tmp = preprocess_document(user_text, stopw)
@@ -379,10 +367,10 @@ if user_text:
         st.metric("📝 Jumlah Kata", len(user_text.split()))
         
         top_topic_id, top_score = topic_dist[0]
-        # Menggunakan st.markdown untuk judul agar bisa wrapping jika perlu
-        st.markdown("🎯 **Kategori Utama**")
-        st.markdown(f"<p style='font-size: 1.5rem; font-weight: bold; margin: 0;'>{labels.get(str(top_topic_id), f'Topik {top_topic_id}')}</p>", unsafe_allow_html=True)
-
+        # TAMPILKAN 1-BASED
+        st.markdown("🎯 **Topik Dominan**")
+        st.markdown(f"<p style='font-size: 1.5rem; font-weight: bold; margin: 0;'>Topik {top_topic_id+1}</p>", unsafe_allow_html=True)
+        st.caption(f"Kata kunci: {top_terms_str(lda, top_topic_id, topn=10)}")
 
     with main_col2:
         st.metric("🔤 Token Diproses", len(tokens))
@@ -390,52 +378,48 @@ if user_text:
     
     # Main results in tabs
     tab_names = [
-        "🏆 Kategori Dominan", 
-        "📊 Distribusi Lengkap", 
-        "☁️ Kata Kunci Artikel", 
-        "🔎 Visualisasi Interaktif (pyLDAvis)" # Tab baru
+        "🏆 Topik Dominan",
+        "📊 Distribusi Topik",
+        "☁️ Kata Kunci Artikel",
+        "🔎 Visualisasi Interaktif (pyLDAvis)"
     ]
     tab1, tab2, tab3, tab4 = st.tabs(tab_names)
     
     with tab1:
-        st.markdown("### 🥇 Top 3 Kategori Berita")
+        st.markdown("### 🥇 Top 3 Topik Artikel")
         
         for i, (topic_id, score) in enumerate(topic_dist[:3]):
-            label = labels.get(str(topic_id), f"Topik {topic_id}")
-            desc = descriptions.get(str(topic_id), "Kategori berita yang diidentifikasi oleh sistem.")
-            
+            title = f"Topik {topic_id+1}"  # TAMPILKAN 1-BASED
+            keywords = top_terms_str(lda, topic_id, topn=10)
             if i == 0:
-                st.success(f"**#{i+1}. {label}**")
+                st.success(f"**#{i+1}. {title}** — kata kunci: {keywords}")
             elif i == 1:
-                st.info(f"**#{i+1}. {label}**")
+                st.info(f"**#{i+1}. {title}** — kata kunci: {keywords}")
             else:
-                st.warning(f"**#{i+1}. {label}**")
-            
-            col1, col2 = st.columns([3, 1])
-            with col1:
-                st.caption(desc)
-            with col2:
-                st.metric("Skor", f"{score:.3f}")
-            
+                st.warning(f"**#{i+1}. {title}** — kata kunci: {keywords}")
+            st.metric("Skor", f"{score:.3f}")
             st.markdown("---")
-        
+
         st.markdown("### 📈 Tingkat Kepercayaan Sistem")
         confidence_fig = create_confidence_gauge(topic_dist[0][1])
         st.plotly_chart(confidence_fig, width='stretch')
     
     with tab2:
-        st.markdown("### 📊 Distribusi Semua Kategori")
+        st.markdown("### 📊 Distribusi Semua Topik")
         
-        dist_fig = create_topic_distribution_chart(topic_dist, labels)
+        dist_fig = create_topic_distribution_chart(topic_dist, lda)
         st.plotly_chart(dist_fig, width='stretch')
         
         with st.expander("📋 Lihat tabel detail"):
+            # (Tabel lama berbasis labels DIHILANGKAN)
+            # Diganti tabel netral tanpa labels/descriptions; TAMPILKAN 1-BASED
             df = pd.DataFrame([
                 {
                     "Ranking": i+1,
-                    "Kategori": labels.get(str(tid), f"Topik {tid}"),
+                    "Topik": f"Topik {tid+1}",
                     "Probabilitas": f"{score:.4f}",
-                    "Persentase": f"{score*100:.2f}%"
+                    "Persentase": f"{score*100:.2f}%",
+                    "Kata kunci (Top-10)": top_terms_str(lda, tid, topn=10)
                 }
                 for i, (tid, score) in enumerate(topic_dist)
             ])
@@ -447,7 +431,6 @@ if user_text:
         
         wc = create_document_wordcloud(tokens)
         if wc:
-            # --- INI BARIS YANG DIPERBAIKI ---
             st.image(wc.to_array(), width='stretch')
             
             word_freq = Counter(tokens)
