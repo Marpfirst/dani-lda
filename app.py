@@ -478,7 +478,7 @@ if user_text:
             with open(html_file_path, 'r', encoding='utf-8') as f:
                 html_string = f.read()
                 # Tampilkan HTML di dalam komponen Streamlit tanpa width tetap
-                components.html(html_string, height=1200, scrolling=False)
+                components.html(html_string, height=1000, scrolling=True)
         else:
             st.warning(
                 "File visualisasi pyLDAvis tidak ditemukan. "
