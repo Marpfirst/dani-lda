@@ -38,7 +38,7 @@ HTML_TAG_TOKEN_RE = re.compile(r"\b(?:nbsp|br|strong|div|span)\b", re.I)
 LEAD_PORTAL_LOC_RE = re.compile(
     r"^\s*(?:"
     r"jakarta|bandung|surabaya|medan|semarang|yogyakarta|aceh|bali|papua|maluku|kalimantan|sulawesi|nusantara|"
-    r"kompas\.com|kompas|cnn indonesia|detikcom|detik|tribunnews\.com|tribunnews|liputan6|tempo|antara|republika"
+    r"kompas\.com|kompas|cnn indonesia|detikcom|detik|tribunnews\.com|tribunnews"
     r")\s*[,–-]*\s*",
     re.I,
 )
@@ -106,14 +106,14 @@ def build_stopwords(extra: Iterable[str] = ()) -> Set[str]:
     domain = {
         # nama media / portal
         "cnn", "indonesia", "kompas", "kompascom", "detik", "detikcom",
-        "tribunnews", "liputan6", "tempo", "antara", "republika", "tribunnewscom", "com",
+        "tribunnews", "tribunnewscom", "com",
 
         # lokasi/fokus geografis umum di awal berita (bukan topik)
         "jakarta", "bandung", "surabaya", "medan", "semarang", "yogyakarta",
         "aceh", "bali", "papua", "maluku", "kalimantan", "sulawesi", "nusantara",
 
         # waktu & kalender
-        "wib", "pukul", "senin", "selasa", "rabu", "kamis", "jumat", "sabtu", "minggu",
+        "wib", "wita", "wit", "pukul", "senin", "selasa", "rabu", "kamis", "jumat", "jum'at", "sabtu", "minggu",
         "hari", "bulan", "tahun",
         "januari", "februari", "maret", "april", "mei", "juni", "juli",
         "agustus", "september", "oktober", "november", "desember",
