@@ -1,4 +1,4 @@
-# app.py - IMPROVED: Fokus User Experience untuk Sistem Informasi
+# app.py
 import json, pickle, requests, sys
 import streamlit as st
 from pathlib import Path
@@ -190,11 +190,11 @@ except Exception as e:
 # Sidebar info
 with st.sidebar:
     # 1. HEADER PROFESIONAL
-    st.title("Analisis Topik Berita dengan LDA") # Ganti dengan judul skripsi Anda
-    st.markdown("Oleh: **Wahyu Rahmadani**") # Ganti dengan nama Anda
-    st.markdown("---") # Garis pemisah bisa diganti dengan st.divider()
+    st.title("Analisis Topik Berita dengan LDA")
+    st.markdown("Oleh: **Wahyu Rahmadani**") 
+    st.markdown("---")
 
-    # 2. TENTANG SISTEM (Dibuat lebih ringkas)
+    # 2. TENTANG SISTEM 
     st.markdown("### ℹ️ Tentang Sistem")
     st.info(
         "Aplikasi ini mengklasifikasikan artikel berita Indonesia ke dalam beberapa topik utama menggunakan model *Latent Dirichlet Allocation* (LDA)."
@@ -203,7 +203,6 @@ with st.sidebar:
     # 3. DETAIL MODEL (Gabungan Statistik & Performa)
     st.markdown("### 📈 Detail Model")
     
-    # Gunakan 2 kolom untuk metrik utama agar hemat tempat
     col1, col2 = st.columns(2)
     with col1:
         st.metric("Jumlah Topik", lda.num_topics)
@@ -278,7 +277,7 @@ with col1:
         with c1:
             if st.button("Politik", width='stretch'):
                 st.session_state.demo_url = DEMO_URLS["Politik"]
-                st.rerun() # Perintahkan Streamlit untuk refresh dengan state baru
+                st.rerun() 
         with c2:
             if st.button("Olahraga", width='stretch'):
                 st.session_state.demo_url = DEMO_URLS["Olahraga"]
@@ -294,7 +293,7 @@ with col1:
             placeholder="https://...",
             value=st.session_state.demo_url,
             key="url_input",
-            label_visibility="collapsed" # Sembunyikan label karena sudah ada di atas
+            label_visibility="collapsed"
         )
 
         if st.button("🚀 Analisis Artikel", type="primary", width='stretch'):
@@ -360,7 +359,6 @@ if user_text:
         topic_dist, tokens = infer(user_text, lda, dictionary, bigram, trigram, stopw)
 
 # Basic stats
-    # Menggunakan tata letak 2x2 untuk memberi lebih banyak ruang
     main_col1, main_col2 = st.columns(2)
 
     with main_col1:
@@ -381,7 +379,7 @@ if user_text:
         "🏆 Topik Dominan",
         "📊 Distribusi Topik",
         "☁️ Kata Kunci Artikel",
-        "🔎 Visualisasi Interaktif (pyLDAvis)"
+        "🔎 Visualisasi Inter-Topik (pyLDAvis)"
     ]
     tab1, tab2, tab3, tab4 = st.tabs(tab_names)
     
@@ -389,7 +387,7 @@ if user_text:
         st.markdown("### 🥇 Top 3 Topik Artikel")
         
         for i, (topic_id, score) in enumerate(topic_dist[:3]):
-            title = f"Topik {topic_id+1}"  # TAMPILKAN 1-BASED
+            title = f"Topik {topic_id+1}"
             keywords = top_terms_str(lda, topic_id, topn=10)
             if i == 0:
                 st.success(f"**#{i+1}. {title}** — kata kunci: {keywords}")
@@ -411,8 +409,6 @@ if user_text:
         st.plotly_chart(dist_fig, width='stretch')
         
         with st.expander("📋 Lihat tabel detail"):
-            # (Tabel lama berbasis labels DIHILANGKAN)
-            # Diganti tabel netral tanpa labels/descriptions; TAMPILKAN 1-BASED
             df = pd.DataFrame([
                 {
                     "Ranking": i+1,
@@ -447,7 +443,6 @@ if user_text:
     with tab4:
             st.markdown("### 🔍 Visualisasi Inter-Topik (pyLDAvis)")
             
-            # Peringatan untuk user experience yang lebih baik
             st.info(
                 """
                 **Panduan Visualisasi:**
@@ -463,7 +458,6 @@ if user_text:
                 with open(html_file_path, 'r', encoding='utf-8') as f:
                     html_content = f.read()
                 
-                # Solusi sederhana - biarkan pyLDAvis mengatur layoutnya sendiri
                 simple_wrapper = f"""
                 <!DOCTYPE html>
                 <html>
