@@ -70,27 +70,45 @@ def infer(text: str, lda, dictionary, bigram, trigram, stopw):
     return topic_dist, toks
 
 def create_confidence_gauge(top_score):
-    """Gauge chart untuk confidence level"""
+    """Gauge chart untuk confidence level (angka selalu center)."""
+    pct = top_score * 100.0
+
     fig = go.Figure(go.Indicator(
-        mode = "gauge+number+delta",
-        value = top_score * 100,
-        domain = {'x': [0, 1], 'y': [0, 1]},
-        title = {'text': "Tingkat Kepercayaan (%)"},
-        gauge = {
-            'axis': {'range': [None, 100]},
-            'bar': {'color': "white"},   # jarum/penunjuk
+        mode="gauge",               
+        value=pct,
+        domain={'x': [0, 1], 'y': [0, 1]},
+        title={'text': "Tingkat Kepercayaan (%)", 'font': {'size': 16}},
+        gauge={
+            'axis': {'range': [0, 100]},
+            'bar': {'color': "black"},
             'steps': [
                 {'range': [0, 25],  'color': "red"},
                 {'range': [25, 50], 'color': "orange"},
                 {'range': [50, 75], 'color': "yellow"},
-                {'range': [75, 100],'color': "green"}],
+                {'range': [75, 100],'color': "green"},
+            ],
             'threshold': {
                 'line': {'color': "black", 'width': 4},
                 'thickness': 0.75,
-                'value': top_score * 100}}))
-    
-    fig.update_layout(height=300)
+                'value': pct
+            }
+        }
+    ))
+
+    # Tambahkan angka di tengah, selalu center relatif ke kanvas
+    fig.add_annotation(
+        x=0.5, y=0.1, xref="paper", yref="paper",
+        text=f"{pct:.1f}%",
+        showarrow=False,
+        font=dict(size=60, color="white")  # ubah warna sesuai tema Anda
+    )
+
+    fig.update_layout(
+        height=300,
+        margin=dict(t=50, b=0, l=0, r=0)
+    )
     return fig
+
 
 def create_topic_distribution_chart(topic_dist, lda, top_n=8):
     """Interactive bar chart untuk distribusi topik"""
