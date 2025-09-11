@@ -111,41 +111,38 @@ def create_confidence_gauge(top_score):
 
 
 def create_topic_distribution_chart(topic_dist, lda, top_n=8):
-    """Interactive bar chart untuk distribusi topik"""
+    """Interactive bar chart untuk distribusi topik dengan palet warna profesional."""
     top_topics = topic_dist[:top_n]
     
-    # TAMPILKAN 1-BASED
-    topic_labels = [f"Topik {tid+1}" for tid, _ in top_topics]
+    topic_labels = [f"Topik {tid + 1}" for tid, _ in top_topics]
     scores = [score for _, score in top_topics]
     
-    # Warna berbeda untuk top 3
-    colors = ['#FF6B6B', '#4ECDC4', '#45B7D1'] + ['#96CEB4'] * (len(scores) - 3)
+    # Opsi 1: Palet Warna Profesional dan Minimalis
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c'] + ['#d3d3d3'] * (len(scores) - 3)
     
     fig = px.bar(
         x=scores, 
         y=topic_labels,
         orientation='h',
         title="Distribusi Topik Artikel",
-        labels={'x': 'Probabilitas', 'y': 'Topik'},
-        color=topic_labels,
-        color_discrete_sequence=colors
+        labels={'x': 'Probabilitas', 'y': ''},
+        text=[f'{s:.1%}' for s in scores]  # Cara lebih modern untuk menambah label
     )
     
     fig.update_layout(
         height=400,
         showlegend=False,
-        yaxis={'categoryorder': 'total ascending'}
+        yaxis={'categoryorder': 'total ascending'},
+        xaxis_title="Probabilitas",
+        font=dict(family="Segoe UI, Arial, sans-serif") # Font yang lebih bersih
     )
     
-    # Tambahkan nilai di ujung bar
-    for i, score in enumerate(scores):
-        fig.add_annotation(
-            x=score + 0.01,
-            y=i,
-            text=f"{score:.3f}",
-            showarrow=False,
-            font=dict(size=10)
-        )
+    # Terapkan warna dan format teks
+    fig.update_traces(
+        marker_color=colors, 
+        textposition='outside',
+        textfont_size=11
+    )
     
     return fig
 
@@ -403,7 +400,8 @@ if user_text:
     
     with tab1:
         st.markdown("### 🥇 Top 3 Topik Artikel")
-        
+        st.caption("Bagian ini menyoroti tiga topik paling relevan untuk artikel, diurutkan berdasarkan skor probabilitas tertinggi.") 
+
         for i, (topic_id, score) in enumerate(topic_dist[:3]):
             title = f"Topik {topic_id+1}"
             keywords = top_terms_str(lda, topic_id, topn=10)
@@ -417,16 +415,19 @@ if user_text:
             st.markdown("---")
 
         st.markdown("### 📈 Tingkat Kepercayaan Sistem")
+        st.caption(f"Visualisasi ini menunjukkan tingkat kepercayaan sistem pada topik dominan (Topik {top_topic_id+1}), yaitu sebesar {top_score:.1%}.") 
         confidence_fig = create_confidence_gauge(topic_dist[0][1])
         st.plotly_chart(confidence_fig, width='stretch')
     
     with tab2:
         st.markdown("### 📊 Distribusi Semua Topik")
-        
+        st.caption("Grafik ini memvisualisasikan kontribusi probabilitas dari semua topik yang terdeteksi. Bar yang lebih panjang menandakan relevansi yang lebih tinggi.") 
+
         dist_fig = create_topic_distribution_chart(topic_dist, lda)
         st.plotly_chart(dist_fig, width='stretch')
         
         with st.expander("📋 Lihat tabel detail"):
+            st.caption("Tabel ini menyajikan data lengkap untuk setiap topik yang terdeteksi, diurutkan dari probabilitas tertinggi hingga terendah.") 
             df = pd.DataFrame([
                 {
                     "Ranking": i+1,
