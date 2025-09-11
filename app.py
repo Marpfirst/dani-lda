@@ -70,42 +70,39 @@ def infer(text: str, lda, dictionary, bigram, trigram, stopw):
     return topic_dist, toks
 
 def create_confidence_gauge(top_score):
-    """Gauge chart untuk confidence level (angka selalu center)."""
+    """Gauge chart untuk confidence level yang lebih baik: warna soft, teks center otomatis, dan layout seimbang."""
     pct = top_score * 100.0
 
     fig = go.Figure(go.Indicator(
-        mode="gauge",               
+        mode="gauge+number",  
         value=pct,
         domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': "Tingkat Kepercayaan (%)", 'font': {'size': 16}},
+        number={'font': {'size': 50, 'color': "#CCCCCC"}, 'prefix': '', 'suffix': '%'},
+        title={'text': "Tingkat Kepercayaan", 'font': {'size': 18, 'color': "#FFFFFF"}}, 
         gauge={
-            'axis': {'range': [0, 100]},
-            'bar': {'color': "black"},
+            'axis': {'range': [0, 100], 'tickwidth': 1, 'tickcolor': "#DDDDDD"},  
+            'bar': {'color': "rgba(255,255,255,0.4)", 'thickness': 1}, 
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "#CCCCCC",  
             'steps': [
-                {'range': [0, 25],  'color': "red"},
-                {'range': [25, 50], 'color': "orange"},
-                {'range': [50, 75], 'color': "yellow"},
-                {'range': [75, 100],'color': "green"},
+                {'range': [0, 25], 'color': "#FF6363"}, 
+                {'range': [25, 50], 'color': "#FEA538"},   
+                {'range': [50, 75], 'color': "#FFD700"},   
+                {'range': [75, 100], 'color': "#49FF49"}, 
             ],
             'threshold': {
-                'line': {'color': "black", 'width': 4},
-                'thickness': 0.75,
+                'line': {'color': "#222222", 'width': 4},  
+                'thickness': 1,
                 'value': pct
             }
         }
     ))
 
-    # Tambahkan angka di tengah, selalu center relatif ke kanvas
-    fig.add_annotation(
-        x=0.5, y=0.1, xref="paper", yref="paper",
-        text=f"{pct:.1f}%",
-        showarrow=False,
-        font=dict(size=60, color="white")  # ubah warna sesuai tema Anda
-    )
-
     fig.update_layout(
-        height=300,
-        margin=dict(t=50, b=0, l=0, r=0)
+        height=320,  
+        margin=dict(t=50, b=20, l=20, r=20),
+        font={'family': "Arial, sans-serif", 'color': "#FFFFFF"} 
     )
     return fig
 
