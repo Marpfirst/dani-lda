@@ -36,7 +36,6 @@ def load_artifacts():
         extra = [w.strip().lower() for w in EXTRA_STOP_PATH.read_text(encoding="utf-8").splitlines() if w.strip()]
         stopw |= set(extra)
 
-    # (Dihilangkan) Pemakaian labels/descriptions manual
     return lda, dictionary, bigram, trigram, stopw
 
 def extract_text_from_url(url: str) -> str:
@@ -45,11 +44,9 @@ def extract_text_from_url(url: str) -> str:
     r.raise_for_status()
     soup = BeautifulSoup(r.text, "html.parser")
     
-    # Hapus script/style
     for script in soup(["script", "style"]):
         script.decompose()
     
-    # Ambil paragraf
     paras = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
     text = "\n".join([t for t in paras if t and len(t) > 20])
     
@@ -113,8 +110,6 @@ def create_topic_distribution_chart(topic_dist, lda, top_n=8):
     
     topic_labels = [f"Topik {tid + 1}" for tid, _ in top_topics]
     scores = [score for _, score in top_topics]
-    
-    # Opsi 1: Palet Warna Profesional dan Minimalis
     colors = ['#1f77b4', '#ff7f0e', '#2ca02c'] + ['#d3d3d3'] * (len(scores) - 3)
     
     fig = px.bar(
@@ -123,7 +118,7 @@ def create_topic_distribution_chart(topic_dist, lda, top_n=8):
         orientation='h',
         title="Distribusi Topik Artikel",
         labels={'x': 'Probabilitas', 'y': ''},
-        text=[f'{s:.1%}' for s in scores]  # Cara lebih modern untuk menambah label
+        text=[f'{s:.1%}' for s in scores]
     )
     
     fig.update_layout(
@@ -131,10 +126,9 @@ def create_topic_distribution_chart(topic_dist, lda, top_n=8):
         showlegend=False,
         yaxis={'categoryorder': 'total ascending'},
         xaxis_title="Probabilitas",
-        font=dict(family="Segoe UI, Arial, sans-serif") # Font yang lebih bersih
+        font=dict(family="Segoe UI, Arial, sans-serif")
     )
     
-    # Terapkan warna dan format teks
     fig.update_traces(
         marker_color=colors, 
         textposition='outside',
@@ -201,7 +195,7 @@ except Exception as e:
 
 # Sidebar info
 with st.sidebar:
-    # 1. HEADER PROFESIONAL
+    # 1. HEADER
     st.title("Analisis Topik Berita dengan LDA")
     st.markdown("Oleh: **Wahyu Rahmadani**") 
     st.markdown("---")
@@ -226,7 +220,7 @@ with st.sidebar:
     with st.expander("Lihat Metrik Performa Model"):
         st.markdown(
             """
-            - **Coherence (c_v):** `0.453`
+            - **Coherence (c_v):** `0.4341`
             - **Log Perplexity:** `-7.83`
             - **Topic Diversity:** `Tinggi`
             """
@@ -268,11 +262,8 @@ with col1:
     article_title = ""
     
     if input_method == "🔗 URL Artikel":
-        # --- BLOK INI YANG KITA MODIFIKASI ---
 
         # 1. Siapkan beberapa contoh URL Demo
-        # PENTING: Ganti URL di bawah ini dengan URL artikel berita asli
-        # yang Anda tahu akan memberikan hasil baik untuk topik tersebut.
         DEMO_URLS = {
             "Politik": "https://nasional.kompas.com/read/2025/08/22/12433401/kaesang-sebut-psi-harus-bawa-manfaat-besar-bukan-menjarah-rakyat",
             "Olahraga": "https://bola.kompas.com/read/2025/09/09/10281588/evaluasi-patrick-kluivert-usai-timnas-indonesia-imbang-lawan-lebanon",
@@ -322,7 +313,7 @@ with col1:
                         st.success(f"✅ Berhasil mengambil artikel ({len(user_text)} karakter)")
                 except Exception as e:
                     st.error(f"❌ Gagal mengambil artikel: {str(e)}")
-        # --- AKHIR BLOK MODIFIKASI ---
+
     else:
         user_text = st.text_area(
             "Tempel teks artikel di sini:",
@@ -377,7 +368,7 @@ if user_text:
         st.metric("📝 Jumlah Kata", len(user_text.split()))
         
         top_topic_id, top_score = topic_dist[0]
-        # TAMPILKAN 1-BASED
+
         st.markdown("🎯 **Topik Dominan**")
         st.markdown(f"<p style='font-size: 1.5rem; font-weight: bold; margin: 0;'>Topik {top_topic_id+1}</p>", unsafe_allow_html=True)
         st.caption(f"Kata kunci: {top_terms_str(lda, top_topic_id, topn=10)}")
