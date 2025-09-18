@@ -10,8 +10,8 @@ Contoh pemakaian:
     --k 10 15 --sample 1000 --passes 5 --iterations 200 --workers 4
 
   # full run (default lebih berat)
-  python train_lda.py --csv ../data/all_berita_sorted.csv --outdir ../models \
-    --k 10 15 20 25 --no_below 12 --no_above 0.5 --min_words 100 --workers 4
+python src/train_lda.py --csv data/all_berita_sorted.csv --outdir models --k 5 10 15 20 --no_below 12 --no_above 0.5 --min_words 100 --workers 4
+
 """
 import argparse
 import json
@@ -19,6 +19,7 @@ import os
 from pathlib import Path
 from typing import List, Tuple, Iterable
 import time
+import pickle
 
 import numpy as np
 import pandas as pd
@@ -175,9 +176,13 @@ def main():
         docs_tokens, no_below=args.no_below, no_above=args.no_above
     )
 
+    # Save artefact corpus
+    with open(outdir / "processed_texts.pkl", "wb") as f:
+        pickle.dump(docs_tokens, f)
+    with open(outdir / "corpus.pkl", "wb") as f:
+        pickle.dump(corpus, f)
     # Save dictionary & phrasers
     dictionary.save(str(outdir / "dictionary.dict"))
-    import pickle
     with open(outdir / "bigram.phraser", "wb") as f:
         pickle.dump(bigram_phraser, f)
     with open(outdir / "trigram.phraser", "wb") as f:

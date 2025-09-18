@@ -197,7 +197,7 @@ except Exception as e:
 with st.sidebar:
     # 1. HEADER
     st.title("Analisis Topik Berita dengan LDA")
-    st.markdown("Oleh: **Wahyu Rahmadani**") 
+    st.markdown("Oleh: **Wahyu Rachmadani**") 
     st.markdown("---")
 
     # 2. TENTANG SISTEM 
@@ -220,8 +220,8 @@ with st.sidebar:
     with st.expander("Lihat Metrik Performa Model"):
         st.markdown(
             """
-            - **Coherence (c_v):** `0.4341`
-            - **Log Perplexity:** `-7.83`
+            - **Coherence (c_v):** `0.4915`
+            - **Log Perplexity:** `-7.5476`
             - **Topic Diversity:** `Tinggi`
             """
         )
